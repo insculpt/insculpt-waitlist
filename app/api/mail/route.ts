@@ -36,7 +36,25 @@ export async function POST(request: NextRequest, response: NextResponse) {
     );
   }
 
-  const { email, firstname } = await request.json();
+  const { email, firstname, turnstileToken } = await request.json();
+
+  if (!turnstileToken) {
+    return Response.json({ error: "Turnstile token is required" }, { status: 400 });
+  }
+
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+  const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: `secret=${encodeURIComponent(turnstileSecret)}&response=${encodeURIComponent(turnstileToken)}&remoteip=${encodeURIComponent(ip)}`,
+  });
+
+  const verifyData = await verifyRes.json();
+  if (!verifyData.success) {
+    return Response.json({ error: "Failed to verify Turnstile token" }, { status: 400 });
+  }
 
   const { data, error } = await resend.emails.send({
     from: "Insculpt<waitlist@updates.insculpt.io>",

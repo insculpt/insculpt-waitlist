@@ -1,6 +1,7 @@
 import { ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import { FaArrowRightLong } from "react-icons/fa6";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { Input } from "@/components/ui/input";
 import { EnhancedButton } from "@/components/ui/enhanced-btn";
 import { containerVariants, itemVariants } from "@/lib/animation-variants";
@@ -11,6 +12,8 @@ interface FormProps {
   handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleEmailChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: () => void;
+  onTurnstileSuccess: (token: string) => void;
+  onTurnstileExpire: () => void;
   loading: boolean;
 }
 
@@ -20,6 +23,8 @@ export default function Form({
   handleNameChange,
   handleEmailChange,
   handleSubmit,
+  onTurnstileSuccess,
+  onTurnstileExpire,
   loading,
 }: FormProps) {
   return (
@@ -44,6 +49,18 @@ export default function Form({
           onChange={handleEmailChange}
         />
       </motion.div>
+      <motion.div variants={itemVariants} className="mt-2 flex justify-center">
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          onSuccess={onTurnstileSuccess}
+          onExpire={onTurnstileExpire}
+          onError={onTurnstileExpire}
+          options={{
+            theme: "dark",
+            size: "flexible",
+          }}
+        />
+      </motion.div>
       <motion.div variants={itemVariants}>
         <EnhancedButton
           variant="expandIcon"
@@ -63,3 +80,4 @@ export default function Form({
     </motion.div>
   );
 }
+

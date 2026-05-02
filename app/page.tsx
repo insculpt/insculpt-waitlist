@@ -11,6 +11,7 @@ export default function Home() {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -36,6 +37,11 @@ export default function Home() {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Please complete the verification challenge");
+      return;
+    }
+
     setLoading(true);
 
     const promise = new Promise(async (resolve, reject) => {
@@ -47,7 +53,7 @@ export default function Home() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ firstname: name, email }),
+          body: JSON.stringify({ firstname: name, email, turnstileToken }),
         });
 
         if (!mailResponse.ok) {
@@ -87,6 +93,7 @@ export default function Home() {
       success: (data) => {
         setName("");
         setEmail("");
+        setTurnstileToken(null);
         return "Thank you for joining the waitlist 🎉";
       },
       error: (error) => {
@@ -118,6 +125,8 @@ export default function Home() {
           handleNameChange={handleNameChange}
           handleEmailChange={handleEmailChange}
           handleSubmit={handleSubmit}
+          onTurnstileSuccess={(token) => setTurnstileToken(token)}
+          onTurnstileExpire={() => setTurnstileToken(null)}
           loading={loading}
         />
 
