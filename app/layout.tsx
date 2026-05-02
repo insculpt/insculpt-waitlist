@@ -55,6 +55,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <link rel="canonical" href="https://insculpt.io" />
+      </head>
       <body className={GeistSans.className}>
         {children}
         <Toaster richColors position="top-center" />
